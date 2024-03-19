@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  hackathon-ws:
+    image: hackathon-ws:latest
+    container_name: hackathon-ws
+    build: .
+    ports:
+      - '8096:8096'
+    env_file:
+      - ./docker_compose.env
+    depends_on:
+      - mongo-hackathon-db
+    networks:
+      - mvp-network
+
+  mongo-hackathon-db:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongodb
+      - MONGO_INITDB_ROOT_PASSWORD=mongodb
+      - MONGO_INITDB_DATABASE=hackathondb
+    networks:
+      - mvp-network
+
+networks:
+  mvp-network:
+    driver: bridge

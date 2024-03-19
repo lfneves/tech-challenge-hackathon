@@ -1,0 +1,46 @@
+server:
+  port: 8096
+  servlet:
+    contextPath: /
+  error:
+    include-message: always
+
+spring-doc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+spring:
+  profiles:
+    active: production
+  data:
+    mongodb:
+      #uri: "${SPRING_DATA_MONGODB_URI:mongodb://mongodb:mongodb@mongo-hackathon-db:27017/hackathondb?authSource=admin}"
+    uri: "${SPRING_DATA_MONGODB_URI:mongodb://mongodb:mongodb@localhost:27017/hackathondb?authSource=admin}"
+    allow-bean-definition-overriding: true
+  docker:
+    compose:
+      file: "docker-compose.yml"
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: yourusername@gmail.com
+    password: yourpassword
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+logging:
+  level:
+    root: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+encryption:
+  secret-key: "${ENCRYPTION_SECRET_KEY:U2VjcmV0LWtleS1EZXYtSGFja2F0aG9u}"
+
+jwt:
+  # Development secret key, set new value production
+  secret: "${SECRET_KEY:eW91ci12ZXJ5LWxvbmctc2VjcmV0LXN0cmluZy1oZXJlLWRlZmF1bHQtZGV2LXZhbHVl}"
