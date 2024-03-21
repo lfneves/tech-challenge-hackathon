@@ -81,6 +81,6 @@ class AuthController @Autowired constructor(
     @ApiResponse(responseCode = "500", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
     @GetMapping(value = ["/get-login-attempts"])
     fun getLoginAttempts(@RequestBody request: @Valid LoginRequest): ResponseEntity<List<LoginAttempt>> {
-        return  ResponseEntity.ok(loginService.findRecentLoginAttempts(request.username))
+        return  ResponseEntity.ok(loginService.findRecentLoginAttempts(encryptionService.encrypt(request.username)))
     }
 }

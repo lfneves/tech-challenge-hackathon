@@ -10,8 +10,8 @@ class EmailService(private val emailSender: JavaMailSender) {
     fun sendSimpleMessage(to: String, subject: String, text: String) {
         val message = SimpleMailMessage()
         message.setTo(to)
-        message.setSubject(subject)
-        message.setText(text)
+        message.subject = subject
+        message.text = text
         emailSender.send(message)
     }
 }

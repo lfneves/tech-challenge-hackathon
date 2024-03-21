@@ -10,10 +10,10 @@ import java.time.ZonedDateTime
 @Document(collection = "login_attempt")
 data class LoginAttemptEntity(
     @Id
-    val id: String? = null,
-    val username: String,
-    val success: Boolean,
-    val createdAt: LocalDateTime = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).toLocalDateTime()
+    var id: String? = null,
+    var username: String,
+    var success: Boolean,
+    var createdAt: LocalDateTime = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).toLocalDateTime()
 ) {
     fun toDTO(): LoginAttempt {
         return LoginAttempt(

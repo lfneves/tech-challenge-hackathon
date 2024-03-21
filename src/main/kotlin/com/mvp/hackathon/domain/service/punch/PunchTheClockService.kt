@@ -1,5 +1,7 @@
 package com.mvp.hackathon.domain.service.punch
 
+import com.mvp.hackathon.domain.model.punch.PunchTheClockDTO
+import com.mvp.hackathon.domain.service.encryption.EncryptionService
 import com.mvp.hackathon.infrastructure.entity.time.BreakPeriod
 import com.mvp.hackathon.infrastructure.entity.time.PunchTheClockEntity
 import com.mvp.hackathon.infrastructure.repository.time.PunchTheClockRepository
@@ -10,59 +12,102 @@ import java.time.LocalDateTime
 
 @Service
 class PunchTheClockService(
-    private val repository: PunchTheClockRepository
+    private val repository: PunchTheClockRepository,
+    private val encryptionService: EncryptionService
 ) {
 
-    fun createTimeEntry(userId: String): PunchTheClockEntity {
-        return repository.save(PunchTheClockEntity(userId = userId, date = LocalDate.now()))
+    fun createTimeEntry(username: String): PunchTheClockEntity {
+        return repository.save(PunchTheClockEntity(username = username, date = LocalDate.now()))
     }
 
-    fun recordStartTime(userId: String, dateTime: LocalDateTime): PunchTheClockEntity {
-        val entry = repository.findByUserIdAndDate(userId, LocalDate.now()) ?: createTimeEntry(userId)
-        entry.startTime = dateTime
-        return repository.save(entry)
+    fun recordStartTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+        val encryptedUsername = encryptionService.encrypt(username)
+        var entry = repository.findByUsernameAndDate(encryptedUsername, LocalDate.now())
+
+        val shouldCreateNewEntry = entry == null || entry.endTime != null
+
+        if (shouldCreateNewEntry) {
+            entry = PunchTheClockEntity(
+                username = encryptedUsername,
+                date = LocalDate.now(),
+                startTime = dateTime
+            )
+        } else {
+            entry?.startTime = dateTime
+        }
+
+        return repository.save(entry!!)
     }
 
-    fun recordEndTime(userId: String, dateTime: LocalDateTime): PunchTheClockEntity {
-        val entry = repository.findByUserIdAndDate(userId, LocalDate.now())
-            ?: throw IllegalStateException("Time entry does not exist for today.")
-        entry.endTime = dateTime
-        return repository.save(entry)
+    fun recordEndTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+        val encryptedUsername = encryptionService.encrypt(username)
+        val date = LocalDate.now()
+
+        val latestEntryWithNullEndTime =
+            repository.findListByUsernameAndDate(encryptedUsername, date)
+                .first { it.endTime == null }
+
+        latestEntryWithNullEndTime.endTime = dateTime
+        return repository.save(latestEntryWithNullEndTime)
     }
 
-    fun startBreak(userId: String, dateTime: LocalDateTime): PunchTheClockEntity {
+    fun startBreak(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+        val encryptedUsername = encryptionService.encrypt(username)
         val today = LocalDate.now()
-        val entry = repository.findByUserIdAndDate(userId, today)
-            ?: throw IllegalStateException("Time entry does not exist for today.")
+        val entry = repository.findListByUsernameAndDate(encryptedUsername, today)
+            .first { it.endTime == null }
 
-        entry.breaks.add(BreakPeriod(startTime = dateTime, endTime = dateTime)) // Temporary endTime, to be updated
+        entry.breaks.add(BreakPeriod(startTime = dateTime, endTime = null))
         return repository.save(entry)
     }
 
-    fun endBreak(userId: String, breakStartTime: LocalDateTime, dateTime: LocalDateTime): PunchTheClockEntity {
+    fun endBreak(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+        val encryptedUsername = encryptionService.encrypt(username)
         val today = LocalDate.now()
-        val entry = repository.findByUserIdAndDate(userId, today)
-            ?: throw IllegalStateException("Time entry does not exist for today.")
-        val breakPeriod = entry.breaks.find { it.startTime == breakStartTime }
+        val entry =  repository.findListByUsernameAndDate(encryptedUsername, today)
+            .first { it.endTime == null }
+        val breakPeriod = entry.breaks
+            .find { it.startTime == entry.breaks.last().startTime
+                && entry.breaks.last().startTime!! < dateTime }
             ?: throw IllegalStateException("Break start time not found.")
         breakPeriod.endTime = dateTime
         return repository.save(entry)
-    }
-
-    fun calculateTotalHours(userId: String): Double {
-        val entry = repository.findById(userId).orElseThrow {
-            IllegalArgumentException("Entry not found with id: $userId")
-        }
-        entry.startTime ?: return 0.0
-        entry.endTime ?: return 0.0
-
-        val totalWorkDuration = Duration.between(entry.startTime, entry.endTime).toMinutes()
-
-        val totalBreaksDuration = entry.breaks.sumOf { breakPeriod ->
-            Duration.between(breakPeriod.startTime, breakPeriod.endTime).toMinutes()
         }
 
-        val effectiveWorkDuration = totalWorkDuration - totalBreaksDuration
-        return effectiveWorkDuration / 60.0
+    fun calculateTotalHours(username: String): MutableList<PunchTheClockDTO> {
+        val encryptedUsername = encryptionService.encrypt(username)
+        val entries = repository.findListByUsernameAndDate(encryptedUsername, LocalDate.now())
+            .takeIf { it.isNotEmpty() }
+            ?: throw IllegalArgumentException("Entries not found with username: $encryptedUsername")
+
+        var totalEffectiveWorkDurationMinutes = 0L
+
+        var response = mutableListOf<PunchTheClockDTO>()
+        entries.forEach { entry ->
+            val startTime = entry.startTime ?: return@forEach
+            val endTime = entry.endTime ?: return@forEach
+
+            val workDuration = Duration.between(startTime, endTime).toMinutes()
+
+            val breaksDuration = entry.breaks.sumOf { breakPeriod ->
+                Duration.between(breakPeriod.startTime, breakPeriod.endTime).toMinutes()
+            }
+
+            totalEffectiveWorkDurationMinutes += (workDuration - breaksDuration)
+
+            val hours = totalEffectiveWorkDurationMinutes / 60
+            val minutes = totalEffectiveWorkDurationMinutes % 60
+            response.add(
+                PunchTheClockDTO(
+                date = entry.date,
+                startTime = entry.startTime,
+                endTime = entry.endTime,
+                breaks = entry.breaks,
+                totalHoursDay = "$hours hours and $minutes minutes"
+                )
+            )
+        }
+
+        return response
     }
 }

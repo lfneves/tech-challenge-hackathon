@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @SpringBootApplication(excludeName = ["de.flapdoodle.embed.mongo.spring.autoconfigure.EmbeddedMongoAutoConfiguration"])
 @EnableMongoRepositories(basePackages = ["com.mvp.hackathon.infrastructure.repository"])
-class PaymentApplication
+class PunchTheClockApplication
 
 fun main(args: Array<String>) {
-    runApplication<PaymentApplication>(*args)
+    runApplication<PunchTheClockApplication>(*args)
 }

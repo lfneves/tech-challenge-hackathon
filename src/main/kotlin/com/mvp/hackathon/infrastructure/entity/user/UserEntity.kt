@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 
 @Document(collection = "user")
-data class UserEntity (
+data class UserEntity(
     @Id var id: String? = null,
     var username: String,
     var password: String,
