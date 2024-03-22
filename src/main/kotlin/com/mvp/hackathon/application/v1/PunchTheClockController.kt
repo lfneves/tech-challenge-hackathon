@@ -2,9 +2,9 @@ package com.mvp.hackathon.application.v1
 
 import com.mvp.hackathon.domain.model.exception.Exceptions
 import com.mvp.hackathon.domain.model.punch.PunchTheClockDTO
-import com.mvp.hackathon.domain.service.auth.SecurityService
-import com.mvp.hackathon.domain.service.encryption.EncryptionService
-import com.mvp.hackathon.domain.service.punch.PunchTheClockService
+import com.mvp.hackathon.domain.service.auth.ISecurityService
+import com.mvp.hackathon.domain.service.encryption.IEncryptionService
+import com.mvp.hackathon.domain.service.punch.IPunchTheClockService
 import com.mvp.hackathon.infrastructure.entity.time.PunchTheClockEntity
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.HttpStatus
@@ -15,9 +15,9 @@ import java.time.LocalDateTime
 @RestController
 @RequestMapping("/api/v1/punch-the-clock")
 class PunchTheClockController(
-    private val service: PunchTheClockService,
-    private val securityService: SecurityService,
-    private val encryptionService: EncryptionService
+    private val service: IPunchTheClockService,
+    private val securityService: ISecurityService,
+    private val encryptionService: IEncryptionService
 ) {
 
     @PostMapping("/start")

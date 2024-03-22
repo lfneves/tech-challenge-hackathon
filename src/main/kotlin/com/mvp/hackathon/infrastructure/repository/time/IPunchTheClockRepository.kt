@@ -4,7 +4,7 @@ import com.mvp.hackathon.infrastructure.entity.time.PunchTheClockEntity
 import org.springframework.data.mongodb.repository.MongoRepository
 import java.time.LocalDate
 
-interface PunchTheClockRepository : MongoRepository<PunchTheClockEntity, String> {
+interface IPunchTheClockRepository : MongoRepository<PunchTheClockEntity, String> {
     fun findByUsernameAndDate(username: String, date: LocalDate): PunchTheClockEntity?
 
     fun findListByUsernameAndDate(username: String, date: LocalDate): List<PunchTheClockEntity>
