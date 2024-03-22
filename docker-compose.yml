@@ -7,6 +7,7 @@ services:
     build: .
     ports:
       - '8096:8096'
+      - '5005:5005'
     env_file:
       - ./docker_compose.env
     depends_on:
@@ -16,6 +17,7 @@ services:
 
   mongo-hackathon-db:
     image: mongo
+#    command: mongod --bind_ip 0.0.0.0
     ports:
       - "27017:27017"
     environment:

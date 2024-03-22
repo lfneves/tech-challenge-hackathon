@@ -30,7 +30,13 @@ class ReportServiceImpl(
         val lastDayOfLastMonth = today.withDayOfMonth(1).minusDays(1)
 
         val report = repository.findByDateBetween(firstDayOfLastMonth, lastDayOfLastMonth)
-        emailService.sendSimpleMessage("lfneveshackathonmvp@gmail.com", "Report Last Month", report.toString())
+        try {
+            emailService
+                .sendSimpleMessage(encryptionService.decrypt(user.email), "Report Last Month", report.toString())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
+        }
         return report
     }
 
@@ -60,7 +66,6 @@ class ReportServiceImpl(
                 endTime = endTime,
                 breaks = breaks
             )
-
             repository.save(entity)
         }
     }

@@ -14,7 +14,8 @@ spring:
     active: production
   data:
     mongodb:
-    uri: "${SPRING_DATA_MONGODB_URI:mongodb://mongodb:mongodb@localhost:27017/hackathondb?authSource=admin}"
+      #uri: "mongodb://mongodb:mongodb@localhost:27017/hackathondb?authSource=admin"
+      uri: "${SPRING_DATA_MONGODB_URI:mongodb://mongodb:mongodb@localhost:27017/hackathondb?authSource=admin}"
     allow-bean-definition-overriding: true
   docker:
     compose:
@@ -22,8 +23,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username:
-    password:
+    username: "${EMAIL_SENDER}"
+    password: "${EMAIL_PASSWORD}"
     properties:
       mail:
         smtp:

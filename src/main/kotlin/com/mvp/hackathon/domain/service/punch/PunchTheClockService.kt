@@ -16,27 +16,22 @@ class PunchTheClockService(
     private val encryptionService: EncryptionService
 ) {
 
-    fun createTimeEntry(username: String): PunchTheClockEntity {
-        return repository.save(PunchTheClockEntity(username = username, date = LocalDate.now()))
-    }
-
     fun recordStartTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
         val encryptedUsername = encryptionService.encrypt(username)
-        var entry = repository.findByUsernameAndDate(encryptedUsername, LocalDate.now())
+        val entries = repository.findListByUsernameAndDate(encryptedUsername, LocalDate.now())
 
-        val shouldCreateNewEntry = entry == null || entry.endTime != null
+        val mostRecentEntry = entries.maxByOrNull { it.startTime ?: LocalDateTime.MIN }
 
-        if (shouldCreateNewEntry) {
-            entry = PunchTheClockEntity(
+        val entry = if (mostRecentEntry == null || mostRecentEntry.endTime != null) {
+            PunchTheClockEntity(
                 username = encryptedUsername,
                 date = LocalDate.now(),
                 startTime = dateTime
             )
         } else {
-            entry?.startTime = dateTime
+            mostRecentEntry.apply { startTime = dateTime }
         }
-
-        return repository.save(entry!!)
+        return repository.save(entry)
     }
 
     fun recordEndTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
@@ -72,7 +67,7 @@ class PunchTheClockService(
             ?: throw IllegalStateException("Break start time not found.")
         breakPeriod.endTime = dateTime
         return repository.save(entry)
-        }
+    }
 
     fun calculateTotalHours(username: String): MutableList<PunchTheClockDTO> {
         val encryptedUsername = encryptionService.encrypt(username)
@@ -107,7 +102,6 @@ class PunchTheClockService(
                 )
             )
         }
-
         return response
     }
 }

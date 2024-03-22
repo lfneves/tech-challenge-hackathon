@@ -78,12 +78,12 @@ class ControllerExceptionHandler {
         return ResponseEntity(apiErrorResponse, HttpStatus.BAD_REQUEST)
     }
 
-    @ExceptionHandler(Exception::class)
-    fun handleUnknownException(e: Exception): ResponseEntity<ApiErrorResponse> {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ApiErrorResponse> {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
             ApiErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                HttpStatus.INTERNAL_SERVER_ERROR.name
+                HttpStatus.UNAUTHORIZED.value(),
+                e.message!!
             )
         )
     }

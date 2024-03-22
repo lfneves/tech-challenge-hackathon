@@ -1,6 +1,5 @@
 package com.mvp.hackathon.domain.service.encryption
 
-import com.mvp.hackathon.domain.configuration.jwt.JWTUtils.createSecretKeyFromCustomString
 import org.apache.tomcat.util.codec.binary.Base64
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service

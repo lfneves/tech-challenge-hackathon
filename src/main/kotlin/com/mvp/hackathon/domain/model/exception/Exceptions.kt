@@ -13,4 +13,7 @@ object Exceptions {
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     class DuplicateException(message: String) : RuntimeException(message)
+
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    class AccessDeniedException(message: String) : RuntimeException(message)
 }

@@ -1,15 +1,17 @@
 package com.mvp.hackathon.application.v1.auth
 
+import com.mvp.hackathon.domain.configuration.jwt.JWTUtils
 import com.mvp.hackathon.domain.model.auth.ApiErrorResponse
 import com.mvp.hackathon.domain.model.auth.LoginAttempt
-import com.mvp.hackathon.domain.model.user.UserDTO
 import com.mvp.hackathon.domain.model.auth.LoginRequest
-import com.mvp.order.domain.model.auth.LoginResponse
-import com.mvp.order.domain.model.auth.ResponseSignupDTO
+import com.mvp.hackathon.domain.model.exception.Exceptions
+import com.mvp.hackathon.domain.model.user.UserDTO
 import com.mvp.hackathon.domain.service.auth.AuthService
 import com.mvp.hackathon.domain.service.auth.LoginService
+import com.mvp.hackathon.domain.service.auth.SecurityService
 import com.mvp.hackathon.domain.service.encryption.EncryptionService
-import com.mvp.hackathon.domain.configuration.jwt.JWTUtils
+import com.mvp.order.domain.model.auth.LoginResponse
+import com.mvp.order.domain.model.auth.ResponseSignupDTO
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -33,7 +36,8 @@ class AuthController @Autowired constructor(
     private val authService: AuthService,
     private val authenticationManager: AuthenticationManager,
     private val loginService: LoginService,
-    private val encryptionService: EncryptionService
+    private val encryptionService: EncryptionService,
+    private val securityService: SecurityService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -80,7 +84,11 @@ class AuthController @Autowired constructor(
     @ApiResponse(responseCode = "404", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
     @ApiResponse(responseCode = "500", content = [Content(schema = Schema(implementation = ApiErrorResponse::class))])
     @GetMapping(value = ["/get-login-attempts"])
+    @PreAuthorize("isAuthenticated()")
     fun getLoginAttempts(@RequestBody request: @Valid LoginRequest): ResponseEntity<List<LoginAttempt>> {
+        if (!securityService.isCurrentUser(encryptionService.encrypt(request.username))) {
+            throw Exceptions.AccessDeniedException("You do not have permission to access this resource.")
+        }
         return  ResponseEntity.ok(loginService.findRecentLoginAttempts(encryptionService.encrypt(request.username)))
     }
 }
