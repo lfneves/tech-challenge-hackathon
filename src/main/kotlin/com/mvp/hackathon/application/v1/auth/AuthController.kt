@@ -6,9 +6,9 @@ import com.mvp.hackathon.domain.model.auth.LoginAttempt
 import com.mvp.hackathon.domain.model.auth.LoginRequest
 import com.mvp.hackathon.domain.model.exception.Exceptions
 import com.mvp.hackathon.domain.model.user.UserDTO
-import com.mvp.hackathon.domain.service.auth.AuthService
+import com.mvp.hackathon.domain.service.auth.IAuthService
 import com.mvp.hackathon.domain.service.auth.LoginService
-import com.mvp.hackathon.domain.service.auth.SecurityService
+import com.mvp.hackathon.domain.service.auth.SecurityServiceImpl
 import com.mvp.hackathon.domain.service.encryption.EncryptionService
 import com.mvp.order.domain.model.auth.LoginResponse
 import com.mvp.order.domain.model.auth.ResponseSignupDTO
@@ -33,11 +33,11 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/auth/")
 @Profile("!test")
 class AuthController @Autowired constructor(
-    private val authService: AuthService,
+    private val iAuthService: IAuthService,
     private val authenticationManager: AuthenticationManager,
     private val loginService: LoginService,
     private val encryptionService: EncryptionService,
-    private val securityService: SecurityService,
+    private val securityServiceImpl: SecurityServiceImpl,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -53,7 +53,7 @@ class AuthController @Autowired constructor(
     @PostMapping("/signup")
     fun signup(@RequestBody request: @Valid UserDTO): ResponseEntity<ResponseSignupDTO> {
         logger.info("/signup")
-        return ResponseEntity.ok(authService.signup(request))
+        return ResponseEntity.ok(iAuthService.signup(request))
     }
 
     @Operation(summary = "Authenticate user and return token")
@@ -86,7 +86,7 @@ class AuthController @Autowired constructor(
     @GetMapping(value = ["/get-login-attempts"])
     @PreAuthorize("isAuthenticated()")
     fun getLoginAttempts(@RequestBody request: @Valid LoginRequest): ResponseEntity<List<LoginAttempt>> {
-        if (!securityService.isCurrentUser(encryptionService.encrypt(request.username))) {
+        if (!securityServiceImpl.isCurrentUser(encryptionService.encrypt(request.username))) {
             throw Exceptions.AccessDeniedException("You do not have permission to access this resource.")
         }
         return  ResponseEntity.ok(loginService.findRecentLoginAttempts(encryptionService.encrypt(request.username)))

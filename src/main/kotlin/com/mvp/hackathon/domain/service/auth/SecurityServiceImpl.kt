@@ -5,10 +5,11 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 
-@Service
-class SecurityService {
 
-    fun isCurrentUser(username: String): Boolean {
+@Service
+class SecurityServiceImpl : ISecurityService {
+
+    override fun isCurrentUser(username: String): Boolean {
         val authentication: Authentication? = SecurityContextHolder.getContext().authentication
         if (authentication == null || !authentication.isAuthenticated) {
             return false

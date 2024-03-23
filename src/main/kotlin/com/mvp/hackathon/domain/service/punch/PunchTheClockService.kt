@@ -4,19 +4,20 @@ import com.mvp.hackathon.domain.model.punch.PunchTheClockDTO
 import com.mvp.hackathon.domain.service.encryption.EncryptionService
 import com.mvp.hackathon.infrastructure.entity.time.BreakPeriod
 import com.mvp.hackathon.infrastructure.entity.time.PunchTheClockEntity
-import com.mvp.hackathon.infrastructure.repository.time.PunchTheClockRepository
+import com.mvp.hackathon.infrastructure.repository.time.IPunchTheClockRepository
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 
+
 @Service
 class PunchTheClockService(
-    private val repository: PunchTheClockRepository,
+    private val repository: IPunchTheClockRepository,
     private val encryptionService: EncryptionService
-) {
+) : IPunchTheClockService {
 
-    fun recordStartTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+    override fun recordStartTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
         val encryptedUsername = encryptionService.encrypt(username)
         val entries = repository.findListByUsernameAndDate(encryptedUsername, LocalDate.now())
 
@@ -34,7 +35,7 @@ class PunchTheClockService(
         return repository.save(entry)
     }
 
-    fun recordEndTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+    override fun recordEndTime(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
         val encryptedUsername = encryptionService.encrypt(username)
         val date = LocalDate.now()
 
@@ -46,7 +47,7 @@ class PunchTheClockService(
         return repository.save(latestEntryWithNullEndTime)
     }
 
-    fun startBreak(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+    override fun startBreak(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
         val encryptedUsername = encryptionService.encrypt(username)
         val today = LocalDate.now()
         val entry = repository.findListByUsernameAndDate(encryptedUsername, today)
@@ -56,7 +57,7 @@ class PunchTheClockService(
         return repository.save(entry)
     }
 
-    fun endBreak(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
+    override fun endBreak(username: String, dateTime: LocalDateTime): PunchTheClockEntity {
         val encryptedUsername = encryptionService.encrypt(username)
         val today = LocalDate.now()
         val entry =  repository.findListByUsernameAndDate(encryptedUsername, today)
@@ -69,7 +70,7 @@ class PunchTheClockService(
         return repository.save(entry)
     }
 
-    fun calculateTotalHours(username: String): MutableList<PunchTheClockDTO> {
+    override fun calculateTotalHours(username: String): MutableList<PunchTheClockDTO> {
         val encryptedUsername = encryptionService.encrypt(username)
         val entries = repository.findListByUsernameAndDate(encryptedUsername, LocalDate.now())
             .takeIf { it.isNotEmpty() }

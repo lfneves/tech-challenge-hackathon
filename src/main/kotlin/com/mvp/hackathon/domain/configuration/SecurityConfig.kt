@@ -42,6 +42,8 @@ class SecurityConfig @Autowired constructor(
                     .requestMatchers(HttpMethod.POST, "/api/auth/signup/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/actuator/health").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/configuration/ui", "/swagger-resources/**", "/configuration/**",
+                        "/swagger-ui.html", "/webjars/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/authentication-docs/**")
                     .permitAll()
                     .anyRequest().authenticated()

@@ -14,6 +14,7 @@ spring:
     active: production
   data:
     mongodb:
+      # Development uri, set SPRING_DATA_MONGODB_URI env new value production
       #uri: "mongodb://mongodb:mongodb@localhost:27017/hackathondb?authSource=admin"
       uri: "${SPRING_DATA_MONGODB_URI:mongodb://mongodb:mongodb@localhost:27017/hackathondb?authSource=admin}"
     allow-bean-definition-overriding: true
