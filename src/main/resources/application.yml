@@ -39,8 +39,8 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
 
 encryption:
-  secret-key: "${ENCRYPTION_SECRET_KEY:U2VjcmV0LWtleS1EZXYtSGFja2F0aG9u}"
+  secret-key: "${ENCRYPTION_SECRET_KEY}"
 
 jwt:
   # Development secret key, set new value production
-  secret: "${SECRET_KEY:eW91ci12ZXJ5LWxvbmctc2VjcmV0LXN0cmluZy1oZXJlLWRlZmF1bHQtZGV2LXZhbHVl}"
+  secret: "${SECRET_KEY}"
