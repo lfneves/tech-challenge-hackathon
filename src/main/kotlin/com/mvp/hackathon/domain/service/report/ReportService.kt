@@ -31,14 +31,22 @@ class ReportService(
         val lastDayOfLastMonth = today.withDayOfMonth(1).minusDays(1)
 
         val report = repository.findByDateBetween(firstDayOfLastMonth, lastDayOfLastMonth)
+        val decryptedReport = decryptUsernamesInEntities(report, encryptionService)
         try {
             emailServiceImpl
-                .sendSimpleMessage(encryptionService.decrypt(user.email), "Report Last Month", report.toString())
+                .sendSimpleMessage(encryptionService.decrypt(user.email), "Report Last Month", decryptedReport.toString())
         } catch (e: Exception) {
             e.printStackTrace()
             throw e
         }
         return report
+    }
+
+    private fun decryptUsernamesInEntities(punchTheClockEntities: List<PunchTheClockEntity>, encryptionService: EncryptionService): List<PunchTheClockEntity> {
+        return punchTheClockEntities.map { entity ->
+            val decryptedUsername = encryptionService.decrypt(entity.username)
+            entity.copy(username = decryptedUsername)
+        }
     }
 
     override fun generateRandomPunchTheClockEntities(username: String, numberOfEntries: Int) {

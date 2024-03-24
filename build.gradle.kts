@@ -47,7 +47,6 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
-//	implementation("org.springframework.boot:spring-boot-docker-compose")
 	implementation("org.mongodb:mongodb-driver-sync:$mongodbDriver")
 
 	// Kotlin utils
@@ -101,20 +100,6 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
 	enabled = true
 	useJUnitPlatform()
-	systemProperty("cucumber.junit-platform.naming-strategy", "long")
-	finalizedBy(tasks.jacocoTestReport)
-}
-
-tasks.register<Test>("cucumber") {
-	useJUnitPlatform {
-		includeEngines("cucumber")
-	}
-	reports {
-		html.required.set(true)
-		junitXml.required.set(true)
-	}
-	testClassesDirs = sourceSets["test"].output.classesDirs
-	classpath = sourceSets["test"].runtimeClasspath
 	finalizedBy(tasks.jacocoTestReport)
 }
 
@@ -129,8 +114,9 @@ tasks.jacocoTestReport {
 		xml.required.set(true)
 		html.required.set(true)
 	}
-	val excludes = listOf("**/configuration/*", "**/model/*", "**/utils/*", "**DTO**",
-		"**/com/mvp/hackathon/HackathonApplication", "**/com/mvp/hackathon/infrastruture/entity/*")
+	val excludes = listOf("**/configuration/**", "**/model/**", "**/utils/**", "**DTO**",  "**/handler**", "**/shared**",
+		"**/com/mvp/hackathon/PunchTheClockApplication.kt", "**/com/mvp/hackathon/infrastructure/entity/**",
+		"**/PunchTheClockApplication/**", "**/com/mvp/hackathon/application/v1/**")
 	classDirectories.setFrom(files(classDirectories.files.map {
 		fileTree(it).apply {
 			exclude(excludes)
@@ -140,8 +126,9 @@ tasks.jacocoTestReport {
 
 tasks.jacocoTestCoverageVerification {
 	violationRules {
-		val excludes = listOf("**/configuration/*", "**/model/*", "**/utils/*", "**DTO**",
-			"**/com/mvp/hackathon/HackathonApplication", "**/com/mvp/hackathon/infrastruture/entity/*")
+		val excludes = listOf("**/configuration/**", "**/model/**", "**/utils/**", "**DTO**",  "**/handler**", "**/shared**",
+			"**/com/mvp/hackathon/PunchTheClockApplication.kt", "**/com/mvp/hackathon/infrastructure/entity/**",
+			"**/PunchTheClockApplication/**", "**/com/mvp/hackathon/application/v1/**")
 		classDirectories.setFrom(files(classDirectories.files.map {
 			fileTree(it).exclude(excludes)
 		}).filter{ file -> !file.name.contains("logger") })

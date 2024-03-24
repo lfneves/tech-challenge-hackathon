@@ -2,3 +2,11 @@ spring:
   profiles:
     profile: test
 de.flapdoodle.mongodb.embedded.version: 6.0.5
+
+
+encryption:
+  secret-key: "${ENCRYPTION_SECRET_KEY:U2VjcmV0LWtleS1EZXYtSGFja2F0aG9u}"
+
+jwt:
+  # Development secret key, set new value production
+  secret: "${SECRET_KEY:eW91ci12ZXJ5LWxvbmctc2VjcmV0LXN0cmluZy1oZXJlLWRlZmF1bHQtZGV2LXZhbHVl}"
